@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yourecipe.member.repository.MemberRepository">
+    <insert id="joinMember">
+        INSERT INTO MEMBER (MEMBER_ID, EMAIL, NICKNAME, PROFILE_IMG)
+        VALUES (DEFAULT, #{email}, #{nickname}, #{profileImg})
+    </insert>
+
+    <select id="findMember" resultType="com.yourecipe.member.model.Member">
+        SELECT MEMBER_ID, EMAIL, NICKNAME, PROFILE_IMG
+        FROM MEMBER
+        WHERE MEMBER_ID = #{memberId}
+    </select>
+
+    <update id="updateMember">
+        UPDATE MEMBER
+        SET NICKNAME = #{nickname}, PROFILE_IMG = #{profileImg}
+        WHERE MEMBER_ID = #{memberId};
+    </update>
+
+    <delete id="quitMember">
+        DELETE
+        FROM MEMBER
+        WHERE MEMBER_ID = #{memberId}
+    </delete>
+</mapper>
