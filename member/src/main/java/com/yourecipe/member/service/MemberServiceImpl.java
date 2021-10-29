@@ -3,6 +3,7 @@ package com.yourecipe.member.service;
 import com.yourecipe.member.model.Member;
 import com.yourecipe.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor    // 생성자 주입
 @Transactional
 public class MemberServiceImpl implements MemberService{
-
     private final MemberRepository memberRepository;
 
     @Override

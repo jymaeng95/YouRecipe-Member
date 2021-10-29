@@ -1,21 +1,16 @@
-package com.yourecipe.member.member;
+package com.yourecipe.member.repository;
 
 import com.yourecipe.member.model.Member;
-import com.yourecipe.member.repository.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
-@MybatisTest
-@Transactional  // 테스트 후 사용 DB 롤백
-public class MemberRepositoryTests {
-
-    @Autowired
+class MemberRepositoryTest {
+    @Resource
     private MemberRepository memberRepository;
 
     @Test
@@ -30,9 +25,6 @@ public class MemberRepositoryTests {
         //then
         assertThat(result).isPositive();
     }
-
-
-
 
     // 테스트에 사용할 member 객체 생성
     private Member createMemberForTest() {

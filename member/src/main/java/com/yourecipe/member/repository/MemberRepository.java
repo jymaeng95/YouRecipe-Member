@@ -1,9 +1,10 @@
 package com.yourecipe.member.repository;
 
 import com.yourecipe.member.model.Member;
+import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
-@Repository
+@Mapper
 public interface MemberRepository {
     // 회원정보 등록하기
     int joinMember(Member member);

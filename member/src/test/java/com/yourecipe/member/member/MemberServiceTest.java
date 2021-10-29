@@ -21,7 +21,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class MemberServiceTests {
+public class MemberServiceTest {
     @Mock
     private MemberRepository memberRepository;
 

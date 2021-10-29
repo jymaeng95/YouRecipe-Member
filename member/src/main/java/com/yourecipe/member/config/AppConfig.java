@@ -1,6 +1,4 @@
 package com.yourecipe.member.config;
-
-import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -18,6 +16,7 @@ import javax.sql.DataSource;
 @MapperScan(basePackages = "com.yourecipe.member.repository")
 @PropertySource("classpath:database.properties")
 public class AppConfig {
+
     @Bean
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
         final SqlSessionFactoryBean sessionFactory = new SqlSessionFactoryBean();
@@ -32,6 +31,6 @@ public class AppConfig {
     @Bean
     public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) throws Exception {
         return new SqlSessionTemplate(sqlSessionFactory);
-
     }
+
 }
