@@ -16,10 +16,9 @@ import org.springframework.boot.convert.DataSizeUnit;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -90,8 +89,11 @@ public class MemberIntegrationTest {
                 .andDo(print());
 
         //when
+
+/*
         ResponseEntity<String> response = template.postForEntity(url, member, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+*/
 
         // Service Logic
         boolean result = memberService.signUpMember(member);
@@ -124,10 +126,10 @@ public class MemberIntegrationTest {
     @Test
     @DisplayName("회원 통합 테스트 : 회원 조회(성공)")
     void 회원조회_성공() throws Exception {
-        String url = "/member/2";
+        String url = "/member/6";
 
         mvc.perform(MockMvcRequestBuilders
-        .get(url))
+                .get(url))
                 .andExpect(status().isOk())
                 .andDo(print());
 
@@ -135,13 +137,95 @@ public class MemberIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
 
-        Optional<Member> member = Optional.ofNullable(memberService.findMemberById(2));
-        if(member.isPresent()) {
-            assertThat(2).isEqualTo(member.get().getMemberId());
+        Optional<Member> member = Optional.ofNullable(memberService.findMemberById(6));
+        if (member.isPresent()) {
+            assertThat(6).isEqualTo(member.get().getMemberId());
             assertThat("zayson.maeng@gmail.com").isEqualTo(member.get().getEmail());
             assertThat("zayson").isEqualTo(member.get().getNickname());
             assertThat("test.com").isEqualTo(member.get().getProfileImg());
         }
+    }
+
+    @Test
+    @DisplayName("회원 통합 테스트 : 회원 조회(싪패)")
+    void 회원조회_실패() throws Exception {
+        String url = "/member/0";
+
+        mvc.perform(MockMvcRequestBuilders
+                .get(url))
+                .andExpect(status().isInternalServerError())
+                .andDo(print());
+
+        ResponseEntity<String> response = template.getForEntity(url, String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isNotNull();
+
+        Optional<Member> member = Optional.ofNullable(memberService.findMemberById(0));
+        assertThat(member.isEmpty()).isTrue();
+    }
+
+    @Test
+    @DisplayName("회원 통합 테스트 : 회원 수정(성공)")
+    void 회원수정_성공() throws Exception {
+        String url = "/member";
+        Member member = updateMember();
+        String content = objectMapper.writeValueAsString(member);
+
+        mvc.perform(MockMvcRequestBuilders
+                .put(url)
+                .content(content)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        boolean result = memberService.editMember(member);
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    @DisplayName("회원 통합 테스트 : 회원 수정(실패)")
+    void 회원수정_실패() throws Exception {
+        String url = "/member";
+        Member member = updateMemberForFail();
+        String content = objectMapper.writeValueAsString(member);
+
+        mvc.perform(MockMvcRequestBuilders
+                .put(url)
+                .content(content)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError())
+                .andDo(print());
+
+        boolean result = memberService.editMember(member);
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    @DisplayName("회원 통합 테스트 : 회원 삭제(성공)")
+    void 회원삭제_성공() throws Exception {
+        String url = "/member/6";
+
+        mvc.perform(MockMvcRequestBuilders
+                .delete(url))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        boolean result = memberService.quitMember(12);
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    @DisplayName("회원 통합 테스트 : 회원 삭제(실패)")
+    void 회원삭제_실패() throws Exception {
+        String url = "/member/0";
+
+        mvc.perform(MockMvcRequestBuilders
+                .delete(url))
+                .andExpect(status().isInternalServerError())
+                .andDo(print());
+
+        boolean result = memberService.quitMember(0);
+        assertThat(result).isFalse();
     }
 
     // 테스트에 사용할 member 객체 생성
@@ -163,4 +247,21 @@ public class MemberIntegrationTest {
                 .build();
     }
 
+    private Member updateMember() {
+        return Member.builder()
+                .memberId(2)
+                .email("update@gmail.com")
+                .nickname("update")
+                .profileImg("update.com")
+                .build();
+    }
+
+    private Member updateMemberForFail() {
+        return Member.builder()
+                .memberId(0)
+                .email("update@gmail.com")
+                .nickname("update")
+                .profileImg("update.com")
+                .build();
+    }
 }
