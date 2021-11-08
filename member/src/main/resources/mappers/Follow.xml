@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yourecipe.member.repository.FollowRepository">
+    <insert id="addFollow">
+        INSERT INTO FOLLOW (USER_ID, FEED_ID)
+        VALUES (#{userId}, #{feedId})
+    </insert>
+    
+    <delete id="deleteFollow">
+        DELETE FROM FOLLOW
+        WHERE FEED_ID = #{feedId}
+    </delete>
+
+    <delete id="deleteFollowList">
+        DELETE FROM FOLLOW
+        WHERE USER_ID = #{userId}
+    </delete>
+
+    <select id="selectFollowList" resultType="com.yourecipe.member.model.Follow">
+        SELECT *
+        FROM FOLLOW
+        WHERE USER_ID = #{userId}
+    </select>
+</mapper>
