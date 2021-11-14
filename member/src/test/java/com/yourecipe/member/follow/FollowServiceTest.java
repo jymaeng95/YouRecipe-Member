@@ -13,9 +13,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,17 +60,89 @@ public class FollowServiceTest {
     @DisplayName("팔로우 서비스 : 팔로우 리스트 조회(성공)")
     void 팔로우_리스트_조회_성공() {
         //given
-        given(followRepository.selectFollowList(2)).willReturn(createFollowLists());
+        List<Follow> followList = createFollowLists();
+        given(followRepository.selectFollowList(2)).willReturn(followList);
 
         //when
-        List<Follow> followList = createFollowLists();
+        Optional<List<Follow>> follows = Optional.ofNullable(followService.getFollowList(2));
 
         //then
-        assertThat(followList).isNotNull();
-        assertThat(followList.get(0).getMemberId()).isEqualTo(2);
-        assertThat(followList.get(0).getFeedId()).isEqualTo(1);
-        assertThat(followList.get(1).getMemberId()).isEqualTo(2);
-        assertThat(followList.get(1).getFeedId()).isEqualTo(3);
+        if(follows.isPresent()){
+            assertThat(follows).isNotNull();
+            assertThat(follows.get().get(0).getMemberId()).isEqualTo(followList.get(0).getMemberId());
+            assertThat(follows.get().get(0).getFeedId()).isEqualTo(followList.get(0).getFeedId());
+            assertThat(follows.get().get(1).getMemberId()).isEqualTo(followList.get(1).getMemberId());
+            assertThat(follows.get().get(1).getFeedId()).isEqualTo(followList.get(1).getFeedId());
+//            assertThat(follows.get(0).getMemberId()).isEqualTo(2);
+//            assertThat(follows.get(0).getFeedId()).isEqualTo(1);
+//            assertThat(follows.get(1).getMemberId()).isEqualTo(2);
+//            assertThat(follows.get(1).getFeedId()).isEqualTo(3);
+        }
+    }
+
+    @Test
+    @DisplayName("팔로우 서비스 : 팔로우 리스트 조회(실패)")
+    void 팔로우_리스트_조회_실패() {
+        //given
+        given(followRepository.selectFollowList(0)).willReturn(null);
+
+        //when
+        Optional<List<Follow>> follows = Optional.ofNullable(followService.getFollowList(0));
+
+        //then
+        assertThat(follows.isEmpty()).isTrue();
+    }
+
+    @Test
+    @DisplayName("팔로우 서비스 : 팔로잉 삭제, 피드 언팔로잉(성공)")
+    void 팔로잉_삭제_성공() {
+        //given
+        given(followRepository.deleteFollow(anyInt())).willReturn(1);
+
+        //when
+        boolean rst = followService.doUnfollow(1);
+
+        //then
+        assertThat(rst).isTrue();
+    }
+
+    @Test
+    @DisplayName("팔로우 서비스 : 팔로잉 삭제, 피드 언팔로잉(실패)")
+    void 팔로잉_삭제_실패() {
+        //given
+        given(followRepository.deleteFollow(anyInt())).willReturn(0);
+
+        //when
+        boolean rst = followService.doUnfollow(0);
+
+        //then
+        assertThat(rst).isFalse();
+    }
+
+    @Test
+    @DisplayName("팔로우 서비스 : 팔로우 리스트 삭제(성공)")
+    void 팔로우_리스트_삭제_성공() {
+        //givne
+        given(followRepository.deleteFollowList(anyInt())).willReturn(1);
+
+        //when
+        boolean rst = followService.clearFollowList(1);
+
+        //then
+        assertThat(rst).isTrue();
+    }
+
+    @Test
+    @DisplayName("팔로우 서비스 : 팔로우 리스트 삭제(실패)")
+    void 팔로우_리스트_삭제_실패() {
+        //given
+        given(followRepository.deleteFollowList(anyInt())).willReturn(0);
+
+        //when
+        boolean rst = followService.clearFollowList(0);
+
+        //then
+        assertThat(rst).isFalse();
     }
 
     private static Follow createFollowList() {

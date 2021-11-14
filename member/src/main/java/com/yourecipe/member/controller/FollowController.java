@@ -35,7 +35,7 @@ public class FollowController {
     @DeleteMapping("/{feedId}")
     public ResponseEntity<String> doUnfollow(@PathVariable("feedId") int feedId) {
         logger.info("팔로우 해제 시도");
-        if(followService.doUnfollow(feedId)) return new ResponseEntity<>("언팔로우 성공", HttpStatus.OK);
+        if(followService.doUnfollow(feedId)) return new ResponseEntity<>("언팔로잉 성공", HttpStatus.OK);
         return new ResponseEntity<>("언팔로잉 실패", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

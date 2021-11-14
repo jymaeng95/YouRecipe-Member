@@ -41,6 +41,7 @@ public class MemberControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+
     @BeforeEach
     void beforeEach() {
         objectMapper = Jackson2ObjectMapperBuilder.json()
