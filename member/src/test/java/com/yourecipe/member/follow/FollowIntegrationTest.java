@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -71,7 +72,32 @@ public class FollowIntegrationTest {
                 .andReturn().getResponse();
 
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+
+        boolean result = followService.doFollow(follow);
+        assertThat(result).isTrue();
     }
+
+    @Test
+    @DisplayName("팔로우 통합 테스트 : 팔로우 시도(실패)")
+    void 팔로우_시도_실패() throws Exception {
+        String url = "/follow";
+        Follow follow = Follow.builder().build(); // null
+
+        MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
+        .post(url)
+        .content(objectMapper.writeValueAsString(follow))
+        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError())
+                .andDo(print())
+                .andReturn().getResponse();
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+        boolean result = followService.doFollow(follow);
+        assertThat(result).isFalse();
+    }
+
+
 
     private static Follow createFollowList() {
         return Follow.builder()

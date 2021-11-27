@@ -8,7 +8,7 @@ import java.util.List;
 @Repository
 public interface FollowRepository {
     // 팔로잉 정보 입력
-    int addFolow(Follow follow);
+    int addFollow(Follow follow);
 
     // 팔로잉 전체 조회
     List<Follow> selectFollowList(int memberId);

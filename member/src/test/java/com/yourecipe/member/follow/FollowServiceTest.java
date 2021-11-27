@@ -33,7 +33,7 @@ public class FollowServiceTest {
     void 팔로우_성공() {
         //given
         Follow follow = createFollowList();
-        given(followRepository.addFolow(any())).willReturn(1);
+        given(followRepository.addFollow(any())).willReturn(1);
 
         //when
         boolean rst = followService.doFollow(follow);
@@ -47,7 +47,7 @@ public class FollowServiceTest {
     void 팔로우_실패() {
         //given
         Follow follow = createFollowList();
-        given(followRepository.addFolow(any())).willReturn(0);
+        given(followRepository.addFollow(any())).willReturn(0);
 
         //when
         boolean rst = followService.doFollow(follow);

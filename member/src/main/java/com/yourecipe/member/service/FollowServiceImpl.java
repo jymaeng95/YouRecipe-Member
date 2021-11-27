@@ -16,7 +16,7 @@ public class FollowServiceImpl implements FollowService{
 
     @Override
     public boolean doFollow(Follow follow) {
-        return followRepository.addFolow(follow) > 0;
+        return followRepository.addFollow(follow) > 0;
     }
 
     @Override
