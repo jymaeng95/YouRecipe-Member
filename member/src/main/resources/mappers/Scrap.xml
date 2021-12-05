@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yourecipe.member.repository.ScrapRepository">
+    <insert id="addScrap">
+        INSERT INTO SCRAP (MEMBER_ID, RECIPE_ID)
+        VALUES (#{memberId}, #{recipeId})
+    </insert>
+
+    <delete id="deleteScrap">
+        DELETE FROM SCRAP
+        WHERE RECIPE_ID = #{recipeId}
+    </delete>
+
+    <delete id="deleteAllScrap">
+        DELETE FROM SCRAP
+        WHERE MEMBER_ID = #{memberID}
+    </delete>
+
+    <select id="selectScrapList" resultType="com.yourecipe.member.model.Scrap">
+        SELECT *
+        FROM SCRAP
+        WHERE MEMBER_ID = #{memberId}
+    </select>
+</mapper>
+

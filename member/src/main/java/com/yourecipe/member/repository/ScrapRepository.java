@@ -11,7 +11,7 @@ public interface ScrapRepository {
     int addScrap(Scrap scrap);
 
     // 레시피 스크랩 해제
-    int deleteScrap(int scrapId);
+    int deleteScrap(int recipeId);
 
     // 레시피 리스트 전체 삭제
     int deleteAllScrap(int memberId);
