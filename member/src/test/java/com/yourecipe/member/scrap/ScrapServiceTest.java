@@ -128,6 +128,20 @@ public class ScrapServiceTest {
         }
     }
 
+    @Test
+    @DisplayName("스크랩 서비스 : 스크랩 리스트 조회(실패)")
+    void 스크랩_리스트_조회_실패() {
+        //given
+        given(scrapRepository.selectScrapList(anyInt())).willReturn(null);
+
+        //when
+        Optional<List<Scrap>> scrapList = scrapService.getScrapList(1);
+
+        //then
+        assertThat(scrapList.isPresent()).isFalse();
+        assertThat(scrapList.isEmpty()).isTrue();
+    }
+
     private static Scrap createScrapForTest() {
         return Scrap.builder()
                 .memberId(1)
