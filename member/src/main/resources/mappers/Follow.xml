@@ -17,7 +17,7 @@
     </delete>
 
     <select id="selectFollowList" resultType="com.yourecipe.member.model.Follow">
-        SELECT *
+        SELECT MEMBER_ID, FEED_ID
         FROM FOLLOW
         WHERE MEMBER_ID = #{memberId}
     </select>

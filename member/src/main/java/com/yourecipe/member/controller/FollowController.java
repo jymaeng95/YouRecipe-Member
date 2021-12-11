@@ -11,8 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,7 +26,7 @@ public class FollowController {
     @PostMapping
     public ResponseEntity<String> doFollow(@RequestBody Follow follow) {
         logger.info("팔로우 추가 시도");
-        if(followService.doFollow(follow)) return new ResponseEntity<>("팔로잉 성공", HttpStatus.OK);
+        if (followService.doFollow(follow)) return new ResponseEntity<>("팔로잉 성공", HttpStatus.OK);
         return new ResponseEntity<>("팔로잉 실패", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -35,7 +34,7 @@ public class FollowController {
     @DeleteMapping("/{feedId}")
     public ResponseEntity<String> doUnfollow(@PathVariable("feedId") int feedId) {
         logger.info("팔로우 해제 시도");
-        if(followService.doUnfollow(feedId)) return new ResponseEntity<>("언팔로잉 성공", HttpStatus.OK);
+        if (followService.doUnfollow(feedId)) return new ResponseEntity<>("언팔로잉 성공", HttpStatus.OK);
         return new ResponseEntity<>("언팔로잉 실패", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -43,18 +42,31 @@ public class FollowController {
     @DeleteMapping("/list/{memberId}")
     public ResponseEntity<String> clearFollowList(@PathVariable("memberId") int memberId) {
         logger.info("팔로우 리스트 삭제 시도");
-        if(followService.clearFollowList(memberId)) return new ResponseEntity<>("팔로우 리스트 삭제 성공", HttpStatus.OK);
+        if (followService.clearFollowList(memberId)) return new ResponseEntity<>("팔로우 리스트 삭제 성공", HttpStatus.OK);
         return new ResponseEntity<>("팔로우 리스트 삭제 실패", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
     // 팔로우 리스트 조회
     @ApiOperation(value = "팔로우 리스트 조회", notes = "회원이 자신의 팔로잉 리스트를 확인할 수 있다.")
     @GetMapping("/{memberId}")
-    public ResponseEntity<?> getFollowList(@PathVariable("memberId") int memberId) {
+    public ResponseEntity<Map<String, Object>> getFollowList(@PathVariable("memberId") int memberId) {
         logger.info("팔로우 리스트 조회 시도");
 
-        Optional<List<Follow>> follow = Optional.ofNullable(followService.getFollowList(memberId));
+        Map<String, Object> map = new HashMap<>();
 
-        if(follow.isPresent()) return new ResponseEntity<>(follow, HttpStatus.OK);
-        return new ResponseEntity<>("팔로우 리스트 조회 실패", HttpStatus.INTERNAL_SERVER_ERROR);
+        Optional<List<Follow>> follow = Optional.ofNullable(followService.getFollowList(memberId));
+        /* 팔로우 리스트 조회 성공 */
+        if (follow.isPresent()) {
+            map.put("status", true);
+            map.put("message", "팔로우 리스트 조회 성공");
+            map.put("data", follow.get());
+            return new ResponseEntity<>(map, HttpStatus.OK);
+        }
+
+        /* 팔로우 리스트 조회 실패 */
+        map.put("status",false);
+        map.put("message","팔로우 리스트 조회 실패");
+        map.put("data", Collections.emptyList());
+        return new ResponseEntity<>(map, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

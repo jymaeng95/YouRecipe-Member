@@ -22,10 +22,14 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -64,9 +68,9 @@ public class FollowIntegrationTest {
         Follow follow = createFollowList();
 
         MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
-        .post(url)
-        .content(objectMapper.writeValueAsString(follow))
-        .contentType(MediaType.APPLICATION_JSON))
+                .post(url)
+                .content(objectMapper.writeValueAsString(follow))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn().getResponse();
@@ -77,27 +81,85 @@ public class FollowIntegrationTest {
         assertThat(result).isTrue();
     }
 
+    /*
+        // null 값 프론트/백엔드 둘다 예외처리 필요
+        @Test
+        @DisplayName("팔로우 통합 테스트 : 팔로우 시도(실패)")
+        void 팔로우_시도_실패() throws Exception {
+            String url = "/follow";
+
+            // 프론트 단에서 널값 체킹해서 넘기기 / 예외처리 로직 필요할듯
+            Follow follow = Follow.builder().build(); // null
+
+            MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
+            .post(url)
+            .content(objectMapper.writeValueAsString(follow))
+            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isInternalServerError())
+                    .andDo(print())
+                    .andReturn().getResponse();
+
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+            boolean result = followService.doFollow(null);
+            assertThat(result).isFalse();
+        }
+    */
     @Test
-    @DisplayName("팔로우 통합 테스트 : 팔로우 시도(실패)")
-    void 팔로우_시도_실패() throws Exception {
-        String url = "/follow";
-        Follow follow = Follow.builder().build(); // null
+    @DisplayName("팔로우 통합 테스트 : 팔로우 조회 시도(성공)")
+    void 팔로우_조회_성공() throws Exception {
+        // given
+        String url = "/follow/2";
 
         MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
-        .post(url)
-        .content(objectMapper.writeValueAsString(follow))
-        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError())
+                .get(url))
+                .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn().getResponse();
 
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 
-        boolean result = followService.doFollow(follow);
-        assertThat(result).isFalse();
+        Optional<List<Follow>> follows = Optional.ofNullable(followService.getFollowList(2));
+
+
+
+        if(follows.isPresent()) {
+            assertThat(follows.get().get(0).getMemberId()).isEqualTo(2);
+            assertThat(follows.get().get(0).getFeedId()).isEqualTo(1);
+
+            assertThat(follows.get().get(1).getMemberId()).isEqualTo(2);
+            assertThat(follows.get().get(1).getFeedId()).isEqualTo(3);
+        }
     }
 
+    @Test
+    @DisplayName("팔로우 통합 테스트 : 팔로우 조회 시도(실패)")
+    void 팔로우_조회_실패() {
+    }
 
+    @Test
+    @DisplayName("팔로우 통합 테스트 : 언팔로우 시도(성공)")
+    void 언팔로우_성공() {
+
+    }
+
+    @Test
+    @DisplayName("팔로우 통합 테스트 : 언팔로우 시도(실패)")
+    void 언팔로우_시도() {
+
+    }
+
+    @Test
+    @DisplayName("팔로우 통합 테스트 : 팔로우 리스트 삭제(성공)")
+    void 팔로우_리스트_삭제_성공() {
+
+    }
+
+    @Test
+    @DisplayName("팔로우 통합 테스트 : 팔로우 리스트 삭제(실패)")
+    void 팔로우_리스트_삭제_실패() {
+
+    }
 
     private static Follow createFollowList() {
         return Follow.builder()
@@ -117,6 +179,6 @@ public class FollowIntegrationTest {
                 .feedId(3)
                 .build();
 
-        return List.of(follow1,follow2);
+        return List.of(follow1, follow2);
     }
 }
