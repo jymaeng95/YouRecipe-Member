@@ -25,7 +25,7 @@ public class MemberController {
     @ApiOperation(value = "회원 가입")
     @PostMapping
     public ResponseEntity<String> signUpMember(@RequestBody Member member) {
-        logger.debug("회원 가입 시도");
+        logger.info("회원 가입 시도");
         if (memberService.signUpMember(member)) return new ResponseEntity<>("가입 성공", HttpStatus.OK);
         return new ResponseEntity<>("가입 실패", HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -33,7 +33,7 @@ public class MemberController {
     @ApiOperation(value = "회원 정보 조회")
     @GetMapping("{memberId}")
     public ResponseEntity<?> findMemberByUserId(@PathVariable("memberId") int memberId) {
-        logger.debug("회원 ID로 회원정보 조회 시도");
+        logger.info("회원 ID로 회원정보 조회 시도");
 //        Member member = memberService.findMemberById(memberId);
 
         Optional<Member> member = Optional.ofNullable(memberService.findMemberById(memberId));
@@ -44,7 +44,7 @@ public class MemberController {
     @ApiOperation(value = "회원 정보 수정")
     @PutMapping
     public ResponseEntity<String> modifyMember(@RequestBody Member member) {
-        logger.debug("회원 정보 수정 시도");
+        logger.info("회원 정보 수정 시도");
         if (memberService.editMember(member)) return new ResponseEntity<>("수정 성공", HttpStatus.OK);
         return new ResponseEntity<>("수정 실패", HttpStatus.INTERNAL_SERVER_ERROR);
     }

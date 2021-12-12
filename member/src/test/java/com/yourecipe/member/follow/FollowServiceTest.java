@@ -97,10 +97,10 @@ public class FollowServiceTest {
     @DisplayName("팔로우 서비스 : 팔로잉 삭제, 피드 언팔로잉(성공)")
     void 팔로잉_삭제_성공() {
         //given
-        given(followRepository.deleteFollow(anyInt())).willReturn(1);
+        given(followRepository.deleteFollow(any())).willReturn(1);
 
         //when
-        boolean rst = followService.doUnfollow(1);
+        boolean rst = followService.doUnfollow(2,1);
 
         //then
         assertThat(rst).isTrue();
@@ -110,10 +110,10 @@ public class FollowServiceTest {
     @DisplayName("팔로우 서비스 : 팔로잉 삭제, 피드 언팔로잉(실패)")
     void 팔로잉_삭제_실패() {
         //given
-        given(followRepository.deleteFollow(anyInt())).willReturn(0);
+        given(followRepository.deleteFollow(any())).willReturn(0);
 
         //when
-        boolean rst = followService.doUnfollow(0);
+        boolean rst = followService.doUnfollow(2,0);
 
         //then
         assertThat(rst).isFalse();

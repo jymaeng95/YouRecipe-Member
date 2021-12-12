@@ -20,8 +20,9 @@ public class FollowServiceImpl implements FollowService{
     }
 
     @Override
-    public boolean doUnfollow(int feedId) {
-        return followRepository.deleteFollow(feedId) > 0;
+    public boolean doUnfollow(int memberId, int feedId) {
+        Follow follow = Follow.builder().memberId(memberId).feedId(feedId).build();
+        return followRepository.deleteFollow(follow) > 0;
     }
 
     @Override

@@ -9,7 +9,7 @@ public interface FollowService {
     boolean doFollow(Follow follow);
 
     // 팔로우 해제
-    boolean doUnfollow(int feedId);
+    boolean doUnfollow(int memberId, int feedId);
 
     // 팔로우 리스트 삭제
     boolean clearFollowList(int memberId);

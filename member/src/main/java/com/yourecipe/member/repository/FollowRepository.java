@@ -14,8 +14,10 @@ public interface FollowRepository {
     List<Follow> selectFollowList(int memberId);
 
     // 팔로잉 삭제
-    int deleteFollow(int feedId);
+    int deleteFollow(Follow follow);
 
     // 팔로잉 전체 삭제
     int deleteFollowList(int memberId);
+
 }
+

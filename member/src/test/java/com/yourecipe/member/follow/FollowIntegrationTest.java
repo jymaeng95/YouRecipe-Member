@@ -8,6 +8,7 @@ import com.yourecipe.member.service.FollowService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +25,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import javax.swing.text.html.Option;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,7 +79,9 @@ public class FollowIntegrationTest {
                 .andDo(print())
                 .andReturn().getResponse();
 
+        String expectBody = "{\"message\":\"팔로우를 성공했습니다.\",\"status\":true}";
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
 
         boolean result = followService.doFollow(follow);
         assertThat(result).isTrue();
@@ -111,19 +117,26 @@ public class FollowIntegrationTest {
         // given
         String url = "/follow/2";
 
+        //when
         MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
                 .get(url))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn().getResponse();
 
+        //then
+        String expectBody = "{\"data\":[{\"memberId\":2,\"feedId\":1}," +
+                "{\"memberId\":2,\"feedId\":3}]," +
+                "\"message\":\"팔로우 리스트 조회를 성공했습니다.\"," +
+                "\"status\":true}";
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
 
+        // service when
         Optional<List<Follow>> follows = Optional.ofNullable(followService.getFollowList(2));
 
-
-
-        if(follows.isPresent()) {
+        //then
+        if (follows.isPresent()) {
             assertThat(follows.get().get(0).getMemberId()).isEqualTo(2);
             assertThat(follows.get().get(0).getFeedId()).isEqualTo(1);
 
@@ -134,31 +147,113 @@ public class FollowIntegrationTest {
 
     @Test
     @DisplayName("팔로우 통합 테스트 : 팔로우 조회 시도(실패)")
-    void 팔로우_조회_실패() {
+    void 팔로우_조회_실패() throws Exception {
+        //given
+        String url = "/follow/0";
+
+        //when
+        MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
+                .get(url))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn().getResponse();
+
+        //then
+        String expectBody = "{\"data\":[],\"message\":\"팔로우 리스트가 없습니다.\",\"status\":true}";
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
+
+        List<Follow> follow = Optional.ofNullable(followService.getFollowList(0)).orElseGet(ArrayList::new);
+
+        //then
+        assertThat(follow).isEqualTo(Collections.emptyList());
+        assertThat(follow.size()).isEqualTo(0);
     }
 
     @Test
     @DisplayName("팔로우 통합 테스트 : 언팔로우 시도(성공)")
-    void 언팔로우_성공() {
+    void 언팔로우_성공() throws Exception {
+        //given
+        String url = "/unfollow/2/1";
+
+        //when
+        MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
+                .delete(url))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn().getResponse();
+
+        //then
+        String expectBody = "{\"message\":\"팔로우를 취소했습니다.\",\"status\":true}";
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
 
     }
 
     @Test
     @DisplayName("팔로우 통합 테스트 : 언팔로우 시도(실패)")
-    void 언팔로우_시도() {
+    void 언팔로우_시도() throws Exception {
+        //given
+        String url = "/unfollow/2/5";
 
+        //when
+        MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
+                .delete(url))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn().getResponse();
+
+        //then
+        String expectBody = "{\"message\":\"팔로우 취소에 실패했습니다.\",\"status\":false}";
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
+
+        //service logic
+        boolean result = followService.doUnfollow(2, 5);
+
+        //then
+        assertThat(result).isFalse();
     }
 
     @Test
     @DisplayName("팔로우 통합 테스트 : 팔로우 리스트 삭제(성공)")
-    void 팔로우_리스트_삭제_성공() {
+    void 팔로우_리스트_삭제_성공() throws Exception {
+        //given
+        String url = "/follow/list/2";
 
+        //when
+        MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
+                .delete(url)).andExpect(status().isOk())
+                .andDo(print())
+                .andReturn().getResponse();
+
+        //then
+        String expectBody = "{\"message\":\"팔로우 리스트를 삭제했습니다.\",\"status\":true}";
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
     }
 
     @Test
     @DisplayName("팔로우 통합 테스트 : 팔로우 리스트 삭제(실패)")
-    void 팔로우_리스트_삭제_실패() {
+    void 팔로우_리스트_삭제_실패() throws Exception {
+        //given
+        String url = "/follow/list/0";
 
+        //when
+        MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
+                .delete(url)).andExpect(status().isOk())
+                .andDo(print())
+                .andReturn().getResponse();
+
+        //then
+        String expectBody = "{\"message\":\"팔로우 리스트 삭제에 실패했습니다.\",\"status\":false}";
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
+
+        //service logic
+        boolean result = followService.clearFollowList(0);
+
+        assertThat(result).isFalse();
     }
 
     private static Follow createFollowList() {

@@ -58,8 +58,9 @@ public class FollowControllerTest {
                 .andReturn().getResponse();
 
         //then
+        String expectBody = "{\"message\":\"팔로우를 성공했습니다.\",\"status\":true}";
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getContentAsString()).isEqualTo("팔로잉 성공");
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
     }
 
     @Test
@@ -75,13 +76,14 @@ public class FollowControllerTest {
                 .post(url)
                 .content(objectMapper.writeValueAsString(follow))
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError())
+                .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn().getResponse();
 
         //then
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        assertThat(response.getContentAsString()).isEqualTo("팔로잉 실패");
+        String expectBody = "{\"message\":\"팔로우를 실패했습니다.\",\"status\":false}";
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
     }
 
     @Test
@@ -100,8 +102,12 @@ public class FollowControllerTest {
                 .andReturn().getResponse();
 
         //then
+        String expectBody = "{\"data\":[{\"memberId\":2,\"feedId\":1}," +
+                "{\"memberId\":2,\"feedId\":3}]," +
+                "\"message\":\"팔로우 리스트 조회를 성공했습니다.\"," +
+                "\"status\":true}";
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getContentAsString()).isEqualTo("[{\"memberId\":2,\"feedId\":1},{\"memberId\":2,\"feedId\":3}]");
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
     }
 
     @Test
@@ -114,21 +120,23 @@ public class FollowControllerTest {
         // when
         MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
         .get(url))
-                .andExpect(status().isInternalServerError())
+                .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn().getResponse();
 
         //then
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        assertThat(response.getContentAsString()).isEqualTo("팔로우 리스트 조회 실패");
+        String expectBody = "{\"data\":[],\"message\":\"팔로우 리스트가 없습니다.\",\"status\":true}";
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
+
     }
 
     @Test
     @DisplayName("팔로우 컨트롤러 : 팔로우 삭제/언팔로잉 시도(성공)")
     void 팔로우_삭제_성공() throws Exception {
         // given
-        given(followService.doUnfollow(anyInt())).willReturn(true);
-        String url = "/follow/2";
+        given(followService.doUnfollow(anyInt(), anyInt())).willReturn(true);
+        String url = "/unfollow/2/3";
 
         // when
         MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
@@ -138,27 +146,31 @@ public class FollowControllerTest {
                 .andReturn().getResponse();
 
         // then
+        String expectBody = "{\"message\":\"팔로우를 취소했습니다.\",\"status\":true}";
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getContentAsString()).isEqualTo("언팔로잉 성공");
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
     }
 
     @Test
     @DisplayName("팔로우 컨트롤러 : 팔로우 삭제/언팔로잉 시도(실패)")
     void 팔로우_삭제_실패() throws Exception {
         // given
-        given(followService.doUnfollow(anyInt())).willReturn(false);
-        String url = "/follow/0";
+        given(followService.doUnfollow(anyInt(),anyInt())).willReturn(false);
+        String url = "/unfollow/2/5";
 
         // when
         MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
         .delete(url))
-                .andExpect(status().isInternalServerError())
+                .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn().getResponse();
 
         //then
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        assertThat(response.getContentAsString()).isEqualTo("언팔로잉 실패");
+        String expectBody = "{\"message\":\"팔로우 취소에 실패했습니다.\",\"status\":false}";
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
+
+
     }
 
     @Test
@@ -176,8 +188,9 @@ public class FollowControllerTest {
                 .andReturn().getResponse();
 
         // then
+        String expectBody = "{\"message\":\"팔로우 리스트를 삭제했습니다.\",\"status\":true}";
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getContentAsString()).isEqualTo("팔로우 리스트 삭제 성공");
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
     }
 
     @Test
@@ -190,13 +203,14 @@ public class FollowControllerTest {
         // when
         MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
         .delete(url))
-                .andExpect(status().isInternalServerError())
+                .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn().getResponse();
 
         //then
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        assertThat(response.getContentAsString()).isEqualTo("팔로우 리스트 삭제 실패");
+        String expectBody = "{\"message\":\"팔로우 리스트 삭제에 실패했습니다.\",\"status\":false}";
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
     }
 
 
