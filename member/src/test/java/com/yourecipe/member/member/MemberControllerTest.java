@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -22,8 +23,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -60,17 +64,20 @@ public class MemberControllerTest {
 
         String content = objectMapper.writeValueAsString(member);
 
-        //when, then
-        mvc.perform(MockMvcRequestBuilders
+        //when
+        MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
                 .post("/member")
                 .content(content)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(result -> {
-                    MockHttpServletResponse response = result.getResponse();
-                    logger.info("[TEST RESPONSE CODE] : " + response.getStatus());
-                    logger.info("[TEST RESPONSE CONTENT] : " + response.getContentAsString());
-                });
+                .andDo(print())
+                .andReturn().getResponse();
+
+        //then
+        String expectBody = "{\"message\":\"회원가입을 성공했습니다.\",\"status\":true}";
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
     }
 
     @Test
@@ -82,17 +89,19 @@ public class MemberControllerTest {
 
         String content = objectMapper.writeValueAsString(member);
 
-        //when, then
-        mvc.perform(MockMvcRequestBuilders
+        //when
+        MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
                 .post("/member")
                 .content(content)
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError())
-                .andExpect(result -> {
-                    MockHttpServletResponse response = result.getResponse();
-                    logger.info("[TEST RESPONSE CODE] : " + response.getStatus());
-                    logger.info("[TEST RESPONSE CONTENT] : " + response.getContentAsString());
-                });
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn().getResponse();
+
+        //then
+        String expectBody = "{\"message\":\"회원가입을 실패했습니다.\",\"status\":false}";
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
     }
 
     @Test
@@ -101,44 +110,46 @@ public class MemberControllerTest {
         //given
         String url = "/member/1";
         Member member = createMemberForTest();
-        given(memberService.findMemberById(1)).willReturn(member);
+        given(memberService.findMemberById(anyInt())).willReturn(member);
 
         String content = objectMapper.writeValueAsString(member);
+
         //when
-        mvc.perform(MockMvcRequestBuilders
+        MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
                 .get(url)
                 .content(content)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.memberId").value(1))
-                .andExpect(jsonPath("$.email").value("zayson.maeng@gmail.com"))
-                .andExpect(jsonPath("$.nickname").value("zayson"))
-                .andExpect(jsonPath("$.profileImg").value("test.com"))
-                .andExpect(result -> {
-                    MockHttpServletResponse response = result.getResponse();
-                    logger.info("[TEST RESPONSE CODE] : " + response.getStatus());
-                    logger.info("[TEST RESPONSE CONTENT] : " + response.getContentAsString());
-                });
+                .andDo(print())
+                .andReturn().getResponse();
 
+        //then
+        String expectBody = "{\"data\":{\"memberId\":1,\"email\":\"zayson.maeng@gmail.com\",\"nickname\":\"zayson\",\"profileImg\":\"test.com\"}," +
+                "\"message\":\"회원정보를 가져왔습니다.\",\"status\":true}";
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
     }
 
     @Test
     @DisplayName("회원 컨트롤러 : 회원 정보 조회(실패)")
     void 회원조회_실패() throws Exception {
         //given
-        String url = "/member/0";
-        given(memberService.findMemberById(0)).willReturn(null);
+        String url = "/member/3";
+        given(memberService.findMemberById(anyInt())).willReturn(null);
 
-
-        //when,then
-        mvc.perform(MockMvcRequestBuilders
+        //when
+        MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
                 .get(url))
-                .andExpect(status().isInternalServerError())
-                .andExpect(result -> {
-                    MockHttpServletResponse response = result.getResponse();
-                    logger.info("[TEST RESPONSE CODE] : " + response.getStatus());
-                    logger.info("[TEST RESPONSE CONTENT] : " + response.getContentAsString());
-                });
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn().getResponse();
+
+        //then
+        String expectBody = "{\"data\":{\"memberId\":0,\"email\":null,\"nickname\":null,\"profileImg\":null}," +
+                "\"message\":\"등록된 회원정보가 없습니다.\",\"status\":true}";
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
+
     }
 
     @Test
@@ -151,16 +162,19 @@ public class MemberControllerTest {
 
         String content = objectMapper.writeValueAsString(member);
 
-        mvc.perform(MockMvcRequestBuilders
+        //when
+        MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
                 .put(url)
                 .content(content)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(result -> {
-                    MockHttpServletResponse response = result.getResponse();
-                    logger.info("[TEST RESPONSE CODE] : " + response.getStatus());
-                    logger.info("[TEST RESPONSE CONTENT] : " + response.getContentAsString());
-                });
+                .andDo(print())
+                .andReturn().getResponse();
+
+        //then
+        String expectBody = "{\"message\":\"회원정보를 수정했습니다.\",\"status\":true}";
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
     }
 
     @Test
@@ -173,17 +187,19 @@ public class MemberControllerTest {
 
         String content = objectMapper.writeValueAsString(member);
 
-        //then
-        mvc.perform(MockMvcRequestBuilders
+        //when
+        MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
                 .put(url)
                 .content(content)
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError())
-                .andExpect(result -> {
-                    MockHttpServletResponse response = result.getResponse();
-                    logger.info("[TEST RESPONSE CODE] : " + response.getStatus());
-                    logger.info("[TEST RESPONSE CONTENT] : " + response.getContentAsString());
-                });
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn().getResponse();
+
+        //then
+        String expectBody = "{\"message\":\"회원정보 수정에 실패했습니다.\",\"status\":false}";
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
     }
 
     @Test
@@ -192,21 +208,24 @@ public class MemberControllerTest {
         //given
         String url = "/member/1";
         Member member = createMemberForTest();
-        given(memberService.quitMember(1)).willReturn(true);
+        given(memberService.quitMember(anyInt())).willReturn(true);
 
         String content = objectMapper.writeValueAsString(member);
 
-        //when,then
-        mvc.perform(MockMvcRequestBuilders
+        //then
+        MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
                 .delete(url)
                 .content(content)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(result -> {
-                    MockHttpServletResponse response = result.getResponse();
-                    logger.info("[TEST RESPONSE CODE] : " + response.getStatus());
-                    logger.info("[TEST RESPONSE CONTENT] : " + response.getContentAsString());
-                });
+                .andDo(print())
+                .andReturn().getResponse();
+
+        //then
+        String expectBody = "{\"message\":\"회원탈퇴를 성공했습니다.\",\"status\":true}";
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
+
     }
 
     @Test
@@ -214,17 +233,20 @@ public class MemberControllerTest {
     void 회원삭제_실패() throws Exception {
         //given
         String url = "/member/0";
-        given(memberService.quitMember(0)).willReturn(false);
+        given(memberService.quitMember(anyInt())).willReturn(false);
 
         //whem, then
-        mvc.perform(MockMvcRequestBuilders
+        MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
                 .delete(url))
-                .andExpect(status().isInternalServerError())
-                .andExpect(result -> {
-                    MockHttpServletResponse response = result.getResponse();
-                    logger.info("[TEST RESPONSE CODE] : " + response.getStatus());
-                    logger.info("[TEST RESPONSE CONTENT] : " + response.getContentAsString());
-                });
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn().getResponse();
+
+        //then
+        String expectBody = "{\"message\":\"회원탈퇴를 실패했습니다.\",\"status\":false}";
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expectBody);
+
     }
 
     // 테스트에 사용할 member 객체 생성
